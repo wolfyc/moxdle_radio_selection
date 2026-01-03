@@ -123,12 +123,11 @@ accepter_button = WebDriverWait(driver, 10).until(
 
 accepter_button.click()
 
-# NOTE : code commenté pour sélectionner un radio button (ex: 'choice_5').
-# Si nécessaire, décommenter et ajuster l'ID et le timeout.
-# radio = WebDriverWait(driver, 30).until(
-#     EC.element_to_be_clickable((By.ID, "choice_5"))
-# )
-# radio.click()
+
+radio = WebDriverWait(driver, 30).until(
+     EC.element_to_be_clickable((By.ID, "choice_5"))
+ )
+radio.click()
 
 submit_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], input[type='submit'], #id_submitbutton")))
 submit_btn.click()

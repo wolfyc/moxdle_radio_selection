@@ -1,72 +1,69 @@
 # moodleBot
 
-Automatisation Selenium minimal pour sélectionner un choix sur un cours Moodle et se connecter via le compte universitaire.
+Outils d'automatisation Selenium pour interagir avec une instance Moodle (sélection d'options, connexion automatisée, etc.). Ce dépôt contient des scripts d'exemple et des helpers pour faciliter les tests et l'exécution planifiée.
 
-## Vue d'ensemble
-- `script.py` : script principal qui automatise la sélection d'une option de cours puis le flux de connexion.
-- `chrome_test_launch.py` : test de fumée ouvrant Chrome pour vérifier l'environnement WebDriver.
-- `credentials.py.example` : modèle local à copier en `credentials.py` pour stocker vos identifiants localement (ne pas committer).
-- `scripts/create_scheduled_task.ps1` : helper PowerShell pour créer une tâche planifiée (Windows).
+## ✨ Vue d'ensemble
+- `script.py` : script principal qui exécute le flux d'automatisation.
+- `chrome_test_launch.py` : test de fumée pour vérifier que le navigateur et le WebDriver fonctionnent.
 
-## Prérequis
+## 🔧 Prérequis
 - Python 3.8+
-- Chrome installé
+- Chrome / Chromium ou autre navigateur compatible
 - Recommandé : `webdriver-manager` pour gérer ChromeDriver automatiquement
 
 Installer les dépendances :
+
 ```bash
-pip install selenium webdriver-manager python-dotenv
+pip install selenium webdriver-manager
 ```
 
-## Configuration des identifiants (3 options)
-1) Fichier local (recommandé pour usage personnel)
-   - Copier `credentials.py.example` → `credentials.py` et remplir `username`/`password`.
-   - `credentials.py` est ignoré par Git par défaut.
+## 🔐 Configuration des identifiants (recommandé : sécurisé et portable)
+Ne stockez jamais de secrets dans le code source.
 
-2) Variables d'environnement
-   - Sous PowerShell (persistant pour l'utilisateur) :
-     ```powershell
-     setx MOODLE_USER "votre_user"
-     setx MOODLE_PASS "votre_pass"
-     ```
-   - Voir la section "Planificateur de tâches" ci‑dessous si vous exécutez le script via le Task Scheduler.
+### Créer et utiliser `credentials.py` (usage local simple)
+- Copiez `credentials.py.example` → `credentials.py` (ou créez `credentials.py` manuellement) et remplissez :
 
-3) `.env` (optionnel)
-   - Créez un fichier `.env` contenant `MOODLE_USER` et `MOODLE_PASS` et installez `python-dotenv`.
-   - Exemple `.env` :
-     ```text
-     MOODLE_USER=votre_user
-     MOODLE_PASS=votre_password
-     ```
+```python
+# credentials.py (ne pas committer)
+username = "votre_user"
+password = "votre_mot_de_passe"
+link = "https://exemple.moodle.org/mod/choice/view.php?id=123456"
+```
 
-## Exécution
+- **Important :** ajoutez `credentials.py` à `.gitignore` pour éviter de committer vos secrets.
+- `script.py` importe `credentials.py` et utilise `username`, `password` et `link` **en priorité**. 
+
+
+
+> Remarque : le dépôt contient `credentials.py.example` comme modèle. 
+
+## ▶️ Exécution
 - Lancer le script principal :
+
 ```bash
 python script.py
 ```
 
-- Smoke test :
+- Smoke test (vérifier WebDriver) :
+
 ```bash
 python chrome_test_launch.py
 ```
 
-## Planifier l'exécution (Windows)
-- Utilisez le script PowerShell `scripts/create_scheduled_task.ps1` :
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\create_scheduled_task.ps1 -ScriptPath "C:\path\to\script.py" -RunAt "2026-01-05 20:00"
-```
-- Remarques : la machine doit être allumée (et non en veille profonde) à l'heure d'exécution ; si la tâche doit s'exécuter sans session ouverte, utilisez des variables système ou un gestionnaire de secrets sécurisé.
+## ⏱️ Planification (optionnelle)
+Pour exécutions périodiques, utilisez l'outil de planification de votre OS (cron, systemd timer, Task Scheduler sur Windows, etc.). Le dossier `scripts/` peut contenir des helpers (ex : script PowerShell pour Windows) — adaptez les chemins et options à votre plateforme.
 
-## Bonnes pratiques
-- Ne commitez jamais de secrets.
-- Préférez `webdriver-manager` pour éviter les problèmes de compatibilité ChromeDriver.
-- Testez localement avant d'automatiser en production.
+## ✅ Bonnes pratiques
+- **Ne commitez jamais de secrets.**
+- Ajoutez `.env` à `.gitignore` et fournissez un `.env.example` si utile.
+- Préférez `webdriver-manager` pour éviter les incompatibilités ChromeDriver/Chrome.
+- Testez toujours localement avant d'automatiser à grande échelle et respectez les conditions d'utilisation du service visé.
 
-## Aide / PRs
-Si vous souhaitez, je peux préparer une PR pour :
-- remplacer les identifiants hardcodés par un usage sécurisé,
-- ajouter un test de fumée automatisé,
-- documenter davantage l'usage pour le Planificateur de tâches Windows.
+## Contribuer / Aide
+Si vous voulez, je peux :
+- créer une PR pour remplacer les identifiants en clair par la lecture de variables d'environnement,
+- ajouter un `.env.example` et une note sur la sécurité,
+- ajouter un test de fumée automatisé pour CI.
 
 ---
-Licence / usage : pour usage personnel et éducatif. Respectez les règles d'accès du site Moodle ciblé avant d'automatiser.
+Licence / usage : usage personnel / éducatif. Respectez toujours les règles d'accès et l'éthique avant d'automatiser des interactions sur un site web.
