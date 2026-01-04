@@ -37,7 +37,7 @@ link = "https://exemple.moodle.org/mod/choice/view.php?id=123456"
 
 > Remarque : le dépôt contient `credentials.py.example` comme modèle. 
 
-## ▶️ Exécution
+## ▶️ Exécution (txt)
 - Lancer le script principal :
 
 ```bash
