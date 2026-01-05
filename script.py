@@ -29,6 +29,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+import time
 import credentials
 # Options de Chrome : 'detach' permet de laisser la fenêtre ouverte après la fin du script.
 options = Options()
@@ -123,12 +125,36 @@ accepter_button = WebDriverWait(driver, 10).until(
 
 accepter_button.click()
 
+# Poll & refresh loop: vérifie 3 fois par seconde, rafraîchit la page si la radio est toujours désactivée,
+# et dès qu'elle est activée on la sélectionne puis on soumet.
+MAX_WAIT = 300  # secondess (configurable)
+CHECK_INTERVAL = 1.0/3  # 3 vérifications par seconde
 
-radio = WebDriverWait(driver, 30).until(
-     EC.element_to_be_clickable((By.ID, "choice_5"))
- )
-radio.click()
-
-submit_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], input[type='submit'], #id_submitbutton")))
-submit_btn.click()
+start_time = time.time()
+while True:
+    try:
+        radio = driver.find_element(By.ID, "choice_5")
+        # Si la radio est activée et visible, on la coche puis on soumet
+        if radio.is_enabled() and radio.is_displayed():
+            if not radio.is_selected():
+                radio.click()
+            submit_btn = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], input[type='submit'], #id_submitbutton"))
+            )
+            submit_btn.click()
+            break
+        else:
+            # Toujours désactivée : rafraîchir et retenter
+            if time.time() - start_time > MAX_WAIT:
+                print(f"Radio did not become enabled within {MAX_WAIT}s, giving up.")
+                break
+            driver.refresh()
+            time.sleep(CHECK_INTERVAL)
+    except (NoSuchElementException, StaleElementReferenceException):
+        # Élément absent ou instable : rafraîchir et retenter
+        if time.time() - start_time > MAX_WAIT:
+            print(f"Radio element not found within {MAX_WAIT}s, giving up.")
+            break
+        driver.refresh()
+        time.sleep(CHECK_INTERVAL)
 
